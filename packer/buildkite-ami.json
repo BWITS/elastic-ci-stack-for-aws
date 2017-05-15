@@ -21,7 +21,7 @@
     {
       "type": "file",
       "source": "../plugins",
-      "destination": "/usr/local/buildkite-aws-stack/plugins"
+      "destination": "/tmp/plugins"
     },
     {
       "type": "shell",
