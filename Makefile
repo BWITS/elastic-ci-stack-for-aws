@@ -29,7 +29,7 @@ config.json:
 build-ami: config.json
 	docker run  -e AWS_DEFAULT_REGION  -e AWS_ACCESS_KEY_ID  -e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
-		--rm --workdir /src -v "$(PWD)/packer:/src" -w /src hashicorp/packer:light \
+		--rm -v "$(PWD):/src" -w /src/packer hashicorp/packer:light \
 			build buildkite-ami.json | tee packer.output
 	jq --arg ImageId $$(grep -Eo 'us-east-1: (ami-.+)' packer.output | cut -d' ' -f2) \
 		'[ .[] | select(.ParameterKey != "ImageId") ] + [{ParameterKey: "ImageId", ParameterValue: $$ImageId}]' \
