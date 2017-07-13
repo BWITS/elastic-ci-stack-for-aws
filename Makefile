@@ -18,7 +18,7 @@ build: build/aws-stack.json
 
 build/aws-stack.json: $(TEMPLATES)
 	docker run --rm -w /app -v "$(PWD):/app" node:slim bash \
-		-c "yarn install --non-interactive && yarn run generate -- $(VERSION)"
+		-c "yarn install --non-interactive && npm start $(VERSION)"
 
 clean:
 	-rm -f build/*
@@ -27,11 +27,11 @@ config.json:
 	cp config.json.example config.json
 
 build-ami: config.json
-	docker run  -e AWS_DEFAULT_REGION  -e AWS_ACCESS_KEY_ID \
+	docker run  -e AWS_DEFAULT_REGION  -e AWS_ACCESS_KEY_ID  -e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
-		-v ${HOME}/.aws:/root/.aws \
-		--rm -v "$(PWD):/src" -w /src/packer hashicorp/packer:light \
-			build buildkite-ami.json | tee packer.output
+                -v ${HOME}/.aws:/root/.aws \
+		--rm --workdir /src -v "$(PWD)/packer/Windows:/src" -w /src hashicorp/packer:light \
+			build -debug buildkite-ami.json | tee packer.output
 	jq --arg ImageId $$(grep -Eo 'us-east-1: (ami-.+)' packer.output | cut -d' ' -f2) \
 		'[ .[] | select(.ParameterKey != "ImageId") ] + [{ParameterKey: "ImageId", ParameterValue: $$ImageId}]' \
 		config.json  > config.json.temp
